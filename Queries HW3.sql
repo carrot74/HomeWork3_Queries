@@ -38,6 +38,11 @@ WHERE
 --4.)Do it with joins
 
 
+SELECT distinct  o2.pid
+FROM orders o1 left outer join orders o2 on o1.aid=o2.aid, customers c
+WHERE c.city='Kyoto'
+	and c.cid = o1.cid
+
 -- 5.)Get names of customer never placed an order with joins
 SELECT customers.name
 FROM customers, orders
@@ -151,6 +156,7 @@ WHERE c.cid = o.cid
 ORDER BY o.ordno asc
 --17. create an error in the dollars column of the orders table
 -- so that you can verify your accuracy checking query
+UPDATE orders
 SET dollars= 451
 WHERE ordno = 1011
 
