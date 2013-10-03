@@ -83,15 +83,20 @@ DROP VIEW IF EXISTS count;
 CREATE VIEW count AS 
 		(SELECT p.city as city, count(p.city) as Num
 		FROM products p
-		GROUP BY p.city);
+		GROUP BY p.city
+		ORDER BY num desc);
 
-SELECT distinct c.name, count.city, count.num
-FROM customers c, products p, count
-WHERE c.city = count.city
-GROUP BY c.name, count.city, count.num
-HAVING MAX(count.num) = (SELECT MAX(Count.num)
-			  FROM count
-				)
+SELECT c.city, c.name
+FROM count, customers c
+GROUP BY c.city, c.name
+HAVING c.city in(			
+	SELECT p.city
+	FROM products p
+	GROUP BY p.city
+	HAVING count(city) in (SELECT MAX(count.num)
+				FROM count)
+	LIMIT 1
+)
 11.)-- c.name, c.city of customers live in any city where the most # of products are made
 DROP VIEW IF EXISTS count;
 CREATE VIEW count AS 
@@ -135,23 +140,27 @@ WHERE a.city = 'New York'
 	and c.cid = o.cid
 	and p.pid=o.pid
 --16.) calculate o.dollars from products and orders
-SELECT distinct c.name , o.qty, p.priceusd, c.discount, o.dollars, o.ordno
-FROM orders o, products p, customers c
-					
-WHERE c.cid = o.cid
-	and p.pid= o.pid
-	and dollars = (o.qty *p.priceUSD) *(1 - c.discount/100)
-	
-ORDER BY o.ordno asc
---CODE BELOW DISPLAYS THE CALCULATED DOLLAR AMOUNT(INCORRECTLY FOR SOME REASON)
-SELECT distinct c.name , o.qty, p.priceusd, c.discount, o.dollars, o.ordno, DollarsCheck
-FROM orders o, products p, customers c, (SELECT (o.qty *p.priceUSD) *(1 - c.discount/100) as 
+SELECT distinct o.ordno, o.dollars,  DCheck
+FROM orders o, products p, customers c, (SELECT (o.qty *p.priceUSD) *(1 - c.discount/100) as DCheck
 					FROM orders o, products p, customers c) as DollarsCheck 
 					
 WHERE c.cid = o.cid
 	and p.pid= o.pid
-	and dollars = (o.qty *p.priceUSD) *(1 - c.discount/100)
+	and dollars = DCheck
 	
 ORDER BY o.ordno asc
 --17. create an error in the dollars column of the orders table
 -- so that you can verify your accuracy checking query
+SET dollars= 451
+WHERE ordno = 1011
+
+SELECT distinct o.ordno
+FROM orders o
+WHERE o.ordno not in (
+	SELECT distinct o.ordno
+	FROM orders o, products p, customers c, (SELECT (o.qty *p.priceUSD) *(1 - c.discount/100) as DCheck
+						FROM orders o, products p, customers c) as DollarsCheck 			
+	WHERE c.cid = o.cid
+		and p.pid= o.pid
+		and dollars = DCheck
+	ORDER BY o.ordno asc)
