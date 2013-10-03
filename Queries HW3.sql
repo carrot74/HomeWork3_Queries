@@ -125,4 +125,33 @@ ORDER BY avg(o.dollars)
 SELECT c.cid ,c.name, COALESCE(SUM(o.dollars),0) as Total
 FROM customers c left outer join orders o on c.cid = o.cid
 GROUP BY c.cid, c.name
-15.)
+15.)--show c.name from agents when a.city =New York and the 
+--names of products they ordered and the agent names
+--show c.name from agents when a.city =New York and the names 
+--of products they ordered and the agent names
+SELECT distinct c.name, a.name, p.name
+FROM customers c, orders o, agents a, products p
+WHERE a.city = 'New York'
+	and c.cid = o.cid
+	and p.pid=o.pid
+--16.) calculate o.dollars from products and orders
+SELECT distinct c.name , o.qty, p.priceusd, c.discount, o.dollars, o.ordno
+FROM orders o, products p, customers c
+					
+WHERE c.cid = o.cid
+	and p.pid= o.pid
+	and dollars = (o.qty *p.priceUSD) *(1 - c.discount/100)
+	
+ORDER BY o.ordno asc
+--CODE BELOW DISPLAYS THE CALCULATED DOLLAR AMOUNT(INCORRECTLY FOR SOME REASON)
+SELECT distinct c.name , o.qty, p.priceusd, c.discount, o.dollars, o.ordno, DollarsCheck
+FROM orders o, products p, customers c, (SELECT (o.qty *p.priceUSD) *(1 - c.discount/100) as 
+					FROM orders o, products p, customers c) as DollarsCheck 
+					
+WHERE c.cid = o.cid
+	and p.pid= o.pid
+	and dollars = (o.qty *p.priceUSD) *(1 - c.discount/100)
+	
+ORDER BY o.ordno asc
+--17. create an error in the dollars column of the orders table
+-- so that you can verify your accuracy checking query
