@@ -1,3 +1,5 @@
+--Richard Liao
+
 --1.)Same question on homework 2
 SELECT 
 	agents.city
